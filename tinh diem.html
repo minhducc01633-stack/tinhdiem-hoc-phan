@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Điểm Học Phần</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .table-section {
+            margin-top: 30px;
+        }
+
+        .table-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: #f0f0f0;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            padding: 8px 15px;
+            width: auto;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-size: 16px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>📚 Quản lý Điểm Học Phần</h1>
+        <p>Đại Học Hải Phòng</p>
+    </div>
+
+    <div class="content">
+        <!-- Thống kê -->
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Số học phần</h3>
+                <div class="value" id="totalSubjects">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Điểm trung bình</h3>
+                <div class="value" id="averageGrade">0.0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Điểm cao nhất</h3>
+                <div class="value" id="maxGrade">0.0</div>
+            </div>
+        </div>
+
+        <!-- Form nhập dữ liệu -->
+        <div class="form-section">
+            <h2 style="margin-bottom: 20px; color: #333;">Thêm Học Phần</h2>
+            <div id="message" class="message"></div>
+            
+            <div class="form-group">
+                <label for="subjectName">Tên Học Phần *</label>
+                <input type="text" id="subjectName" placeholder="VD: Toán cao cấp, Lập trình Web, ...">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="grade">Điểm Số (0-10) *</label>
+                    <input type="number" id="grade" placeholder="VD: 8.5" step="0.1" min="0" max="10">
+                </div>
+                <div class="form-group">
+                    <label for="credits">Số Tín Chỉ *</label>
+                    <input type="number" id="credits" placeholder="VD: 3" step="1" min="1">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="semester">Học Kỳ *</label>
+                    <select id="semester">
+                        <option value="">-- Chọn học kỳ --</option>
+                        <option value="HK1">Học Kỳ 1</option>
+                        <option value="HK2">Học Kỳ 2</option>
+                        <option value="HK3">Học Kỳ 3</option>
+                        <option value="HK4">Học Kỳ 4</option>
+                        <option value="HK5">Học Kỳ 5</option>
+                        <option value="HK6">Học Kỳ 6</option>
+                        <option value="HK7">Học Kỳ 7</option>
+                        <option value="HK8">Học Kỳ 8</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="year">Năm Học *</label>
+                    <input type="text" id="year" placeholder="VD: 2024-2025">
+                </div>
+            </div>
+
+            <button onclick="saveData()">💾 Lưu Học Phần</button>
+        </div>
+
+        <!-- Bảng danh sách -->
+        <div class="table-section">
+            <h2>Danh Sách Học Phần</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Học Phần</th>
+                        <th>Điểm</th>
+                        <th>Tín Chỉ</th>
+                        <th>Học Kỳ</th>
+                        <th>Năm Học</th>
+                        <th>Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr class="no-data">
+                        <td colspan="6">Chưa có dữ liệu. Hãy thêm học phần mới.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // ⚠️ THAY ĐỔI CẤU HÌNH FIREBASE CỦA BẠN TẠI ĐÂY
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  let db;
+  
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+  } catch(error) {
+    showMessage('❌ Lỗi khởi tạo Firebase. Vui lòng kiểm tra cấu hình.', 'error');
+    console.error('Firebase Error:', error);
+  }
+
+  // Hiển thị thông báo
+  const showMessage = (msg, type = 'success') => {
+    const messageDiv = document.getElementById('message');
+    messageDiv.className = `message ${type} show`;
+    messageDiv.textContent = msg;
+    setTimeout(() => messageDiv.classList.remove('show'), 3000);
+  };
+
+  // Lưu dữ liệu
+  window.saveData = async () => {
+    const name = document.getElementById('subjectName').value.trim();
+    const grade = parseFloat(document.getElementById('grade').value);
+    const credits = parseInt(document.getElementById('credits').value);
+    const semester = document.getElementById('semester').value;
+    const year = document.getElementById('year').value.trim();
+
+    // Validation
+    if(!name) {
+      showMessage('❌ Vui lòng nhập tên học phần', 'error');
+      return;
+    }
+    
+    if(isNaN(grade) || grade < 0 || grade > 10) {
+      showMessage('❌ Vui lòng nhập điểm từ 0-10', 'error');
+      return;
+    }
+
+    if(isNaN(credits) || credits < 1) {
+      showMessage('❌ Vui lòng nhập số tín chỉ hợp lệ', 'error');
+      return;
+    }
+
+    if(!semester) {
+      showMessage('❌ Vui lòng chọn học kỳ', 'error');
+      return;
+    }
+
+    if(!year) {
+      showMessage('❌ Vui lòng nhập năm học', 'error');
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "grades"), { 
+        name: name,
+        grade: grade,
+        credits: credits,
+        semester: semester,
+        year: year,
+        timestamp: new Date().toISOString()
+      });
+      
+      showMessage('✅ Lưu học phần thành công!', 'success');
+      
+      // Reset form
+      document.getElementById('subjectName').value = '';
+      document.getElementById('grade').value = '';
+      document.getElementById('credits').value = '';
+      document.getElementById('semester').value = '';
+      document.getElementById('year').value = '';
+      
+      // Tải lại danh sách
+      await loadData();
+    } catch(error) {
+      showMessage('❌ Lỗi lưu dữ liệu: ' + error.message, 'error');
+      console.error('Error:', error);
+    }
+  };
+
+  // Tính toán thống kê
+  const updateStats = (data) => {
+    if(data.length === 0) {
+      document.getElementById('totalSubjects').textContent = '0';
+      document.getElementById('averageGrade').textContent = '0.0';
+      document.getElementById('maxGrade').textContent = '0.0';
+      return;
+    }
+
+    const totalSubjects = data.length;
+    const totalWeightedGrade = data.reduce((sum, item) => sum + (item.grade * item.credits), 0);
+    const totalCredits = data.reduce((sum, item) => sum + item.credits, 0);
+    const averageGrade = (totalWeightedGrade / totalCredits).toFixed(1);
+    const maxGrade = Math.max(...data.map(item => item.grade)).toFixed(1);
+
+    document.getElementById('totalSubjects').textContent = totalSubjects;
+    document.getElementById('averageGrade').textContent = averageGrade;
+    document.getElementById('maxGrade').textContent = maxGrade;
+  };
+
+  // Hiển thị dữ liệu
+  const loadData = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "grades"));
+      const tableBody = document.getElementById('tableBody');
+      const data = [];
+
+      querySnapshot.forEach((docSnap) => {
+        data.push({ id: docSnap.id, ...docSnap.data() });
+      });
+
+      // Sắp xếp theo thời gian mới nhất
+      data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      tableBody.innerHTML = '';
+
+      if(data.length === 0) {
+        tableBody.innerHTML = '<tr class="no-data"><td colspan="6">Chưa có dữ liệu. Hãy thêm học phần mới.</td></tr>';
+        updateStats([]);
+        return;
+      }
+
+      data.forEach((item) => {
+        const gradeColor = item.grade >= 8 ? '#28a745' : item.grade >= 7 ? '#ffc107' : item.grade >= 5 ? '#ff9800' : '#dc3545';
+        tableBody.innerHTML += `
+          <tr>
+            <td><strong>${item.name}</strong></td>
+            <td><span style="color: ${gradeColor}; font-weight: bold;">${parseFloat(item.grade).toFixed(1)}</span></td>
+            <td>${item.credits}</td>
+            <td>${item.semester}</td>
+            <td>${item.year}</td>
+            <td>
+              <button class="delete-btn" onclick="deleteGrade('${item.id}')">🗑️ Xóa</button>
+            </td>
+          </tr>`;
+      });
+
+      updateStats(data);
+    } catch(error) {
+      console.error('Lỗi tải dữ liệu:', error);
+      showMessage('❌ Không thể tải dữ liệu từ Firebase', 'error');
+    }
+  };
+
+  // Xóa dữ liệu
+  window.deleteGrade = async (id) => {
+    if(confirm('Bạn chắc chắn muốn xóa học phần này?')) {
+      try {
+        await deleteDoc(doc(db, "grades", id));
+        showMessage('✅ Xóa thành công!', 'success');
+        await loadData();
+      } catch(error) {
+        showMessage('❌ Lỗi xóa: ' + error.message, 'error');
+      }
+    }
+  };
+
+  // Tải dữ liệu khi trang load
+  window.addEventListener('load', () => {
+    if(db) loadData();
+  });
+</script>
+</body>
+</html>
